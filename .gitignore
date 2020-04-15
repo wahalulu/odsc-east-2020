@@ -2,5 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-solutions
+solutions/
+ignore/
+.DS_Store
+*.nb.html
+raw
 

@@ -126,7 +126,7 @@ Let's wait a minut or two. You can go to https://portal.azure.com/#blade/HubsExt
 
 Next, we will create our Cognitive Services service, but we will do this manually. The AzureCognitive package is still in development and currently having issues.
 
-Go to the xxxxxx document for step-by-step instructions. Copy the Cognitive Service URL and key from the Portal, and store them in the objects below:
+Go to the [create-cognitive-service.md](create-cognitive-service.md) document for step-by-step instructions. Copy the Cognitive Service URL and key from the Portal, and store them in the objects below:
 
 ```{r}
 cogservices_endpoint <- ""

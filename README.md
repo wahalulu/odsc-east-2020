@@ -42,6 +42,8 @@ Have R and RStudio installed. In addition, please have the following packages al
 * `AzureRMR`
 * `AzureCognitive`
 
+Also, it is recommended that you have some knowledge of working with Tidyverse packages like dplyr.
+
 ### GitHub
 
 We will be demonstrating working with APIs using GitHub.

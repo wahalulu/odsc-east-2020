@@ -7,12 +7,22 @@ date: "April 15, 2020"
 output:
   xaringan::moon_reader:
     lib_dir: libs
+    css: xaringan-themer.css
     nature:
       ratio: "16:9"
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
 ---
+
+```{r xaringan-themer, include=FALSE}
+library(xaringanthemer)
+solarized_light(
+  code_font_family = "Fira Code",
+  code_font_url    = "https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css"
+)
+```
+
 
 class: inverse, center, middle
 
@@ -23,13 +33,15 @@ class: inverse, center, middle
 # Objectives
 
 --
-* Learn how to work with `httr`, `curl`, and `jsonlite` to consume data from APIs
-
---
-* Learn how to use some packages from the [cloudyr](http://cloudyr.github.io/) project to create resources in the cloud and use services to augment your data
-
--- 
-* Learn how to transform your R code into an API you can serve using `plumber`
+* **Module 1:** Learn how to work with `httr`, `curl`, and `jsonlite` to consume data from APIs
+<br/>
+<br/>
+* **Module 2:** Learn how to use some packages from the [cloudyr](http://cloudyr.github.io/) project to create resources in the cloud and use services to augment your data
+<br/>
+<br/>
+* **Module 3:** Learn how to transform your R code into an API you can serve using `plumber`
+<br/>
+<br/>
 
 ---
 class: inverse, center, middle
@@ -41,14 +53,19 @@ class: inverse, center, middle
 ---
 
 
+# Me
 
+.pull-left[
+<img src="images/marck-vaisman-headshot.jpg" width=300>
+]
 
-# About
-
+.pull-right[
 * Sr. Cloud Solutions Architect, Microsoft Data & AI
 * Adjunct professor at Georgetown and GWU
 * Co-founder of DataCommunityDC
 * R Fanatic
+]
+
 
 ---
 
@@ -60,26 +77,33 @@ class: inverse, center, middle
 
 # What is an API?
 
-API: Application Programming Interface
+## API: Application Programming Interface
 
 APIs allow software programs to communicate with each other. One program can call another program’s API to get access to data or functionality of the other program.
 
 An API is an interface exposed by some software. It's an abstraction of the underlying implementation (code, architecture, etc.)
 
+<div align="center">
+<img src="images/communicating-with-a-server.jpeg" width=600>
+</div>
+
+.footnote[https://zapier.com/learn/apis/chapter-1-introduction-to-apis/]
+
+
 ---
 
 # Web (Remote) APIs - our focus today
+
+## Characteristics
 
 * Communicate over the Internet
 * Many are open, many require authentication
 * HTTP protocol
 * REST architecture
 
----
+## RESTful APIs - the vast majority
 
-# RESTful APIs - the vast majority
-
-REST: Representational State Transfer
+**REST: Representational State Transfer**
 
 * Client/server separation
 * Statelessness 
@@ -89,47 +113,62 @@ REST: Representational State Transfer
 * Uniform interface
 
 ---
-background-image: url(images/rest-api-basics.png)
-background-size: contain
 
-.footnote[Figure from the book _The Design of Everyday APIs_ by Arnand Lauret, 2019, Manning]
+<div align="center">
+<img src="images/rest-api-basics.png" width=900>
+</div>
 
----
-background-image: url(images/http-method.png)
-background-size: contain
-
-.footnote[Figure from the book _The Design of Everyday APIs_ by Arnand Lauret, 2019, Manning]
-
----
-
-background-image: url(images/rest-api-call.png)
-background-size: contain
 
 .footnote[Figure from the book _The Design of Everyday APIs_ by Arnand Lauret, 2019, Manning]
 
 ---
 
-background-image: url(images/rest-call-anatomy.png)
+# HTTP Verbs
+
+<div align="center">
+<img src="images/http-method.png" width=700>
+</div>
+
+
+.footnote[Figure from the book _The Design of Everyday APIs_ by Arnand Lauret, 2019, Manning]
+
+---
+
+# REST API Process
+
+<div align="center">
+<img src="images/rest-api-call.png" width=850>
+</div>
+
+
+.footnote[Figure from the book _The Design of Everyday APIs_ by Arnand Lauret, 2019, Manning]
+
+---
+# Structure of HTTP Request
+
+<div align="center">
+<img src="images/3-structure-of-an-http-request.jpeg" width=650>
+</div>
+
+
+.footnote[https://zapier.com/learn/apis/chapter-1-introduction-to-apis/]
+
+---
+
+background-image: url(images/JSONSample.jpg)
 background-size: contain
 
 .footnote[https://www.slideshare.net/sharepointbits/understanding-and-programming-the-sharepoint-rest-api]
 
 ---
 
-background-image: url(images/images/JSONSample.jpg)
-background-size: contain
+class: inverse, center, middle
 
-.footnote[https://www.slideshare.net/sharepointbits/understanding-and-programming-the-sharepoint-rest-api]
-
----
-
-background-image: url(images/wahalulu-github-1.png)
-background-size: contain
-
+# curl
 
 ---
 
-# Open GET call with curl
+# Open `GET` call with `curl`
 
 ```{bash, echo = TRUE, eval = FALSE}
 (base) ➜  ~ curl https://api.github.com/users/wahalulu
@@ -153,7 +192,7 @@ background-size: contain
 
 ---
 
-# Open GET with curl and headers
+# Open `GET` with `curl` and headers
 
 ```{bash, echo = TRUE, eval = FALSE}
 (base) ➜  ~ curl -i https://api.github.com/users/wahalulu
@@ -180,7 +219,7 @@ background-size: contain
 
 ---
 
-# Authenticated POST
+# Authenticated `POST` with `curl`
 
 ```{bash, echo = TRUE, eval = FALSE}
 (base) ➜  ~ curl -X POST -u wahalulu:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
@@ -204,11 +243,6 @@ https://api.github.com/user/repos -d "{\"name\":\"dcr-repo-created-by-curl\"}"
 
 ---
 
-background-image: url(images/wahalulu-github-2.png)
-background-size: contain
-
----
-
 class: inverse, center, middle
 
 # R and APIs
@@ -219,26 +253,26 @@ class: inverse, center, middle
 
 --
 
-httr
+`httr`
 
 Useful tools for working with HTTP organised by HTTP verbs (GET(), POST(), etc). Configuration functions make it easy to control additional request components (authenticate(), add_headers() and so on).
 
 --
 
-curl
+`curl`
 
 The curl package provides bindings to the libcurl C library for R. The package supports retrieving data in-memory, downloading to disk, or streaming using the R “connection” interface. Some knowledge of curl is recommended to use this package. **For a more user-friendly HTTP client, have a look at the httr package which builds on curl with HTTP specific tools and logic.**
 
 --
 
-jsonlite
+`jsonlite`
 
 A fast JSON parser and generator optimized for statistical data and the web. 
 
 
 ---
 
-# RCurl is outdated
+# `RCurl` is outdated, use `curl` (the R package) instead
 
 <div align="center">
 <img src="images/jeron-ooms-twitter-curl-rcurl.png" width=500>
@@ -248,7 +282,7 @@ A fast JSON parser and generator optimized for statistical data and the web.
 
 # httr call
 
-command line curl
+command line `curl`
 
 ```{bash, echo = TRUE, eval = FALSE}
 (base) ➜  ~ curl -X POST -u wahalulu:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
@@ -296,11 +330,6 @@ $id
 
 ---
 
-background-image: url(images/wahalulu-github-3.png)
-background-size: contain
-
-
----
 background-image: url(images/burns.png)
 background-size: contain
 
@@ -352,7 +381,13 @@ get_members <- function(urlname, api_key = NULL){
 ---
 class: inverse, center, middle
 
-# Managing your cloud
+# Exercise 1
+
+---
+
+class: inverse, center, middle
+
+# Managing and using the cloud
 
 ---
 
@@ -388,26 +423,55 @@ background-size: contain
 
 
 ---
-background-image: url(images/r-dev-guide.png)
+
+class: inverse, center, middle
+
+# Exercise 2
+
+---
+
+class: inverse, center, middle
+
+# Plumber
+
+---
+
+# `plumber`
+
+* Easily convert R functions into accessible API endpoints
+* Uses OpenAPI Specification
+
+---
+
+background-image: url(images/plumber-01.png)
 background-size: contain
 
 ---
-class: inverse, center, middle
 
-# Demo: Connecting to and creating resources on Azure with R
-
----
-class: inverse, center, middle
-
-# Demo: Using Azure Cognitive Services from R
-
----
-background-image: url(images/azure-ml-r-sdk.png)
+background-image: url(images/plumber-02.png)
 background-size: contain
 
 ---
+background-image: url(images/plumber-03.png)
+background-size: contain
+
+---
+background-image: url(images/plumber-04.png)
+background-size: contain
+
+
+---
+background-image: url(images/plumber-05.png)
+background-size: contain
+
+---
+
+class: inverse, center, middle
+
+# Exercise 3
+
+---
+
 background-image: url(images/thats-all-folks.png)
 background-size: cover
-
-
 

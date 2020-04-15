@@ -1,0 +1,230 @@
+---
+title: "Module 1 Exercises"
+output: html_notebook
+---
+
+Begin by loading the required libraries. Note that even though `httr`, `jsonlite` and `glue` are part of the [tidyverse](http://tidyverse.org), they are not loaded into the namespace when you load tidyverse, so you have to load them specifically.
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(glue)
+```
+
+# Exercise 1
+
+For the first exercise, we will be querying financial information from the Financial Modeling Prep API. 
+
+```{r}
+finmod_api_url <- "https://financialmodelingprep.com/api/v3/"
+```
+
+Let's get a quote for the stock price of Microsoft (MSFT). 
+
+The API URL format for getting a stock quote is:
+
+https://financialmodelingprep.com/api/v3/quote/XXXX
+
+where "XXXX" is the ticker symbol.
+
+Try it out, query the API by generating the get request using the `GET` function from the `httr` package.
+
+```{r}
+GET(url = "")
+```
+
+Now query the API again, but this time store it in an object:
+
+```{r}
+msft_quote <- GET(url = "")
+```
+
+What class is the `msft_quote` object? Use `class` to find out.
+
+```{r}
+class()
+```
+
+We see that `msft_quote` is a `response` object. The `response` object stores the raw response you get from the API call and creates an object with all sorts of good information for you.
+
+Let's inspect the header. We can do that with the `headers` function:
+
+```{r}
+headers()
+```
+
+As you can see, we are seeing the header converted to a list. 
+
+Now, let's explore the actual response using the `content` function:
+
+```{r}
+content()
+```
+
+As you see, we can now see the response in the form of a list. We know the response was a JSON object, so if we want to see it as JSON we can set another parameter to the `content` function:
+
+Let's see it as plain text:
+
+```{r}
+content(   , as = "text")
+```
+
+We are now seeing the textual representation of the JSON object. Note the escaped quotes, since this is a character vector.
+
+But, what if we actually want to store the response into a tibble or dataframe? We use the `fromJSON` function from `jsonlite`. `fromJSON needs the response as text.
+
+```{r}
+msft_quote_tbl <- tibble(fromJSON(        ))
+```
+
+Great!
+
+# Exercise 2
+
+For the next exercise, we now want to get data for multiple stocks and store it in a tibble, so we can then to other things like visualize the data or whatever else we need to do. We won't do that today, but we will build a dataset from the responses for multiple stocks.
+
+We'll start out with a plain text file that has the 30 tickers that make up the Dow Jones Industrial Average. 
+
+Let's read in the tickers from a text file called `dow-30-tickers.txt` with no header into a tibble with a variable called `ticker`.
+
+```{r}
+dow30 <- read_csv("", col_names = "")
+```
+
+In Exercise 1 we queried a single stock. However, the same query can handle multiple stocks. The URL has the following format:
+
+https://financialmodelingprep.com/api/v3/quote/XXXX,YYYY,ZZZZ
+
+where XXXX, YYYY and ZZZZ (or more) are different symbols.
+
+So, think about how to approach this.
+
+First, lets combine all tickers into a single, comma-separated string. How would you do that? There are many ways,
+
+```{r}
+dow_string <- dow30 %>% pull(ticker) %>% glue_collapse(sep = ",")
+```
+
+Now let's run the API query again:
+
+```{r}
+dow_quote <- GET(url = glue("{finmod_api_url}quote/{dow_string}"))
+```
+
+A few things from the url: we used `glue` to paste all the stings together. APIs can have many different endpoints for different functionality, but usually there is a "base" url. In our case this is what we used:
+
+* the "base" was https://financialmodelingprep.com/api/v3/"
+* the "service, function or endpoint" was "quote/"
+* the query element was "AXP,AAPL,BA,CAT,CSCO,CVX,XOM,GS,HD,IBM,INTC,JNJ,KO,JPM,MCD,MMM,MRK,MSFT,NKE,PFE,PG,TRV,UNH,RTX,VZ,V,WBA,WMT,DIS,DOW"
+
+That was easy!
+
+Now, create a tibble from the `dow_quote` response using `fromJSON`.
+
+```{r}
+dow_quote_tbl <- tibble(fromJSON(       )))
+```
+
+
+# Exercise 3
+
+Now let's use an API endpoint where the query string has additional parameters.
+
+We want to use the `search` endpoint to request the ticker symbols containg the string "AA" in the name, from the NASDAQ exchange.
+
+The URL for this query has this format:
+
+https://financialmodelingprep.com/api/v3/search?query=XX&limit=YY&exchange=ZZZZ
+
+where the query element has parameters:
+
+* query=XX is the string we want to search for
+* limit=YY is the maximum number of results returned
+* exchange=ZZZZ the name of the exchange
+
+Using the `GET` function, we can take a list that gets converted to a set of keys and values separted by the `&` symbol.
+
+Let's create a list with the three items: "AA" for query, 10 for limit and "NASDAQ" for exchange:
+
+```{r}
+aa_tickers_from_nasdaq_list <- list(    )
+```
+
+Now we can use that list with the `GET` command to generate the query string.
+
+```{r}
+aa_nasdaq_query <- GET(url = glue("{finmod_api_url}search"), 
+                       query = aa_tickers_from_nasdaq)
+```
+
+Now create a tibble with the results:
+
+```{r}
+aa_nasdaq_tbl <- tibble(fromJSON(   )))
+```
+
+If we wanted to get all results, we remove the "limit" from the list.
+
+
+# Exercise 4
+
+Up until now, we have received or limited the responses we get from an API call. However, sometimes, the number of results you can get at a given time are limited, or you want to split the query up into smaller pieces such that not to burden the server.
+
+Here are some common filters used by API's:
+
+* offset, limit : "limit" determines how many records to retrieve starting from the "offset"
+* page, limit : "page" determines which data the server needs to return based on number of records per page
+
+In the next example, let's imagine that the API (a mock API) is limited to 2 records per page, and we want to get the first 9 records of many. The URL has the following form:
+
+https://5b5cb0546a725000148a67ab.mockapi.io/api/v1/users?page=4&limit=2
+
+What to do?
+
+We need to query the API multiple times.
+
+https://5b5cb0546a725000148a67ab.mockapi.io/api/v1/users?page=1&limit=2
+https://5b5cb0546a725000148a67ab.mockapi.io/api/v1/users?page=2&limit=2
+https://5b5cb0546a725000148a67ab.mockapi.io/api/v1/users?page=3&limit=2
+https://5b5cb0546a725000148a67ab.mockapi.io/api/v1/users?page=4&limit=2
+https://5b5cb0546a725000148a67ab.mockapi.io/api/v1/users?page=5&limit=1
+
+Tedious, right?
+
+Well, in this case we would need to generate the URLs programatically.
+
+How many pages will we need? How many records in the last page?
+```{r}
+pages <- ceiling(9 / 2) # of paginated queries to execute at 2 records p/page
+last_limit <- 9 %% 2
+
+page_vector <- 1 : pages
+limit_vector <- c(rep(2, pages - 1), last_limit)
+```
+
+Now attampt to generate all the URLs programatically. There are many ways to do this.
+
+```{r}
+paginated_urls <- 
+
+```
+
+Now we can use any of the `apply` or `purrr::map` family of functions to execute the query and store the results into a list we can process afterwards.
+
+```{r}
+paginated_results <- paginated_urls %>%
+  map(GET)
+```
+
+This creates a list of responses, which you then need to `apply` or `map` through to extract the parts you need.
+
+Looks like this code that is ideal to turn into a function.
+
+Tips:
+
+* Create functions that generate the URL for the particular endpoint
+* When working with paginated queries, sometimes the header will tell you the number of total responses the query would generate if not paginated. You can use this to split your query.
+* Write functions to paginate
+* Read API instructions
+

@@ -25,7 +25,7 @@ From a command & control perspective, we discuss several packages included in th
 
 Last, we discuss the [plumber](https://www.rplumber.io/) R package, which allows users to expose existing R code as a service available to others on the Web. We discuss how to take models and functions and expose them as APIs so others can use them.
 
-## Is this course for me?
+## Is this workshop for me?
 
 There are many packages in R that are built to interface with specific APIs. They are essentially wrappers around some of the packages we will be discussing. However, sometimes you need to access APIs where there is no existing R package. Come and learn how to use `httr`, `jsonlite` and `curl` to make API calls using R. Additionally, learn about `plumber` to share your R work programatically.
 
@@ -35,7 +35,7 @@ There are many packages in R that are built to interface with specific APIs. The
 
 Have R and RStudio installed. In addition, please have the following packages also installed:
 
-* `httr` (part of the tidyverse)
+* `httr`
 * `jsonlite`
 * `curl`
 * `plumber`
@@ -46,7 +46,7 @@ Have R and RStudio installed. In addition, please have the following packages al
 
 We will be demonstrating working with APIs using GitHub.
 
-* Create a [GitHub] account if you don't already have one.
+* Create a [GitHub](www.github.com) account if you don't already have one.
 * Create a Personal Access Token to be able to authenticate against the GitHub API. Follow the instructions at [https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line). **Make sure you store this token in a secure place.**
 
 ### Azure

@@ -1,0 +1,213 @@
+---
+title: "Module 2 Exercises"
+output: html_notebook
+---
+
+In Module 1, we used GET to retrieve stuff from APIs. We also used APIs that did not require any form of authentication or authorization.
+
+In this exercise, we will use the POST verb to execute differnt kind of instructions, and we will also need to provide a method of authentication.
+
+# Get your keys
+
+In the pre-requisites, we asked you to create a GitHub personal token. Go to https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line. If you haven't, go ahead and do it now. Put the string of your token in the `github_token` object below.
+
+```{r}
+github_token <- ""
+```
+
+
+Load the following libraries:
+
+```{r}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(glue)
+```
+
+
+# Exercise 1
+
+In this exercise, you will be creating a GitHub repository with the following properties:
+
+* The reposotory name is "odsc-github-repo-created-with-r"
+* The repositopy description is "This repository was created using R"
+* Issue reporting is disabled
+* Wiki is disabled
+* Has a .gitignore template for R
+
+The github base URL is https://api.github.com
+
+The action for creating a repo for an authenticated user is /user/repos
+
+You can read more on the github api here: https://developer.github.com/v3/repos/. You will need to read the documentation to determine the names of the properties above to pass into the API: https://developer.github.com/v3/repos/#create-a-repository-for-the-authenticated-user
+
+Combine the base URL and the action to the create an endpoint URL:
+
+```{r}
+endpoint <- ""
+```
+
+Put your GitHub username here:
+
+```{r}
+user <- ""
+```
+
+Create a list object with the properties for the new repo:
+
+```{r}
+post_body <- list(
+
+  
+  
+)
+```
+
+If you want to see what the list looks like as a JSON object, you can use the `toJSON` function. Remember, this will be passed as JSON to the GitHub API.
+
+```{r}
+toJSON(post_body)
+```
+
+Now, you can issue the POST without storing the results into an object. However, we recommend that you do store all responses in case you need to look at them later. Let's create the POST call, you will need the endpoint, the authentication (which has been provided), the body (list), and the encoding (json).
+
+```{r}
+create_repo <- POST(url = ,
+                    authenticate(user, github_token),
+                    body = ,
+                    encode = )
+```
+
+Awesome, you have just created a repository in your GitHub account using R! Go to your GitHub page and see the repository there.
+
+
+# Exercise 2
+
+
+We asked you to create a Microsoft Azure https://azure.microsoft.com/en-us/ account if you do not already have one. You can use a personal email. 
+
+* You can sign up at [https://azure.microsoft.com/en-us/free/](https://azure.microsoft.com/en-us/free/)
+* If you are a student, you can sign up for an Azure Student account at [https://azure.microsoft.com/en-us/free/students/](https://azure.microsoft.com/en-us/free/students/)
+
+
+Load the `AzureRMR` package which allows you to create resources on Azure.
+
+```{r}
+library(AzureRMR)
+```
+
+The next command will log you into your Azure account interactively using a browser. If you are currently logged into a Microsoft account, log off before you do this so you can authenticate with the right account.
+
+```{r}
+az <- create_azure_login()
+```
+
+The next set of calls will be retrieving certain elements from your Azure account (subscriptionid), so you can then create a resource group.
+
+```{r}
+sublist <- az$list_subscriptions()
+sub <- az$get_subscription(names(sublist))
+```
+
+Give your resource group a name. It can be whatever you want. I will give mine the name "odsc-rg-created-with-azurermr"
+
+```{r}
+rg_name <- "odsc-rg-created-with-azurermr"
+```
+
+Now, we will create the resourse group using the name above and the subscription.
+
+```{r}
+sub$create_resource_group(name = rg_name, location = "eastus2")
+```
+
+Let's wait a minut or two. You can go to https://portal.azure.com/#blade/HubsExtension/BrowseResourceGroups and hit refresh until you see the resource group created.
+
+Next, we will create our Cognitive Services service, but we will do this manually. The AzureCognitive package is still in development and currently having issues.
+
+Go to the xxxxxx document for step-by-step instructions. Copy the Cognitive Service URL and key from the Portal, and store them in the objects below:
+
+```{r}
+cogservices_endpoint <- ""
+cogservices_key <- ""
+```
+
+Let's create a toy dataset with some phrases in different languages:
+
+```{r}
+mytext <- tribble(
+  ~id, ~text,
+  1, "is this english?",
+  2, "tak er der mere kage",  #Danish
+  3, "merci beacoup", #French
+  4, "guten morgen", #German
+  5, "bonjour", # French
+  6, "merde", #French"
+  7, "That's terrible", 
+  8, "esto es una pesadilla", #Spanish
+  9, "שלם", #Hebrew
+  10, "R is awesome")
+```
+
+We will be using two of the Text Analytics API to augment our dataset:
+
+* The `text/analytics/v2.0/languages` service to detect language
+* The `text/analytics/v2.0/sentiment` service to detect sentiment
+
+First, let's convert our tibble into a list, which will then be converted to a JSON object.
+
+```{r}
+language_list <- list(documents =  )
+```
+
+Now we will create the POST object and send it to the Language Service:
+
+```{r}
+language_response <-
+  POST(
+    url = ,
+    add_headers(`Ocp-Apim-Subscription-Key` = cogservices_key),
+    body = 
+  )
+```
+
+Let's convert the response back to a tibble and join it back to our original dataset:
+
+
+```{r}
+language_response_tbl <- 
+  tibble(fromJSON(content(language_response, as = "text"))$documents) %>%
+  unnest(detectedLanguages) %>% 
+  inner_join(mytext %>% mutate(id = as.character(id)))
+```
+
+Now we create a new list with the columns we need for the sentiment service. For sentiment analysis to be accurate, we need to tell the service what language it is, so we need the id, the language code (iso6391Name), and the text to score.
+
+```{r}
+sentiment_list <- list(  )
+```
+
+And now, we POST to the sentiment service:
+
+```{r}
+sentiment_response <- 
+  POST(
+    url = ,
+    add_headers(`Ocp-Apim-Subscription-Key` = cogservices_key),
+    body = )
+    )
+```
+
+
+```{r}
+augmented_mytext <- tibble(fromJSON(content(sentiment_response, as = "text"))$documents) %>%
+  rename(sentiment_score = score) %>%
+  right_join(language_response_tbl)
+augmented_mytext
+```
+
+You have just learned how to structure authenticated POST API calls!
+
+
+

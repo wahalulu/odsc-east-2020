@@ -1,0 +1,55 @@
+---
+title: "Module 3 - Consume REST API"
+output: html_notebook
+---
+
+Load the libraries
+
+```{r}
+library(httr)
+library(jsonlite)
+library(tidyverse)
+```
+
+Take Iris and make some transformations
+
+```{r}
+iris_tbl <- iris %>% transmute(obs = as.character(1:nrow(.)),
+                               species = as.character(Species),
+                               sepal_lenght = Sepal.Length,
+                               sepal_width = Sepal.Width,
+                               petal_length = Petal.Length,
+                               petal_width = Petal.Width)
+```
+
+Set the API endpoint
+
+```{r}
+myapi_url <- "http://127.0.0.1:8000"
+myapi_path <- "widelong"
+```
+
+Creat the body
+
+```{r}
+body <- list(
+  .data = iris_tbl,
+  .trans = "l",
+  .key = "measurement",
+  .value = "value",
+  .select = c("sepal_length", "sepal_width", "petal_length", "petal_width")
+)
+```
+
+Send the reponse
+
+```{r}
+myapi_response <- POST(url = myapi_url,
+     path = myapi_path,
+     body = body,
+     encode = "json")
+```
+
+```{r}
+content(myapi_response)
+```

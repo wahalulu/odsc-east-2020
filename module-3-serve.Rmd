@@ -1,0 +1,24 @@
+---
+title: "Module 3 - Start REST API"
+output: html_notebook
+---
+
+For this exercise, we have already created a function for you that uses some of the magic of the Tidyverse to convert a dataset from long to wide, or vice versa. This function
+
+The R code for this function, with the approprate plumber markup is in `myrestapi.R`.
+
+In this workbook, we will start serving the API with the function.
+
+You must run this workbook in a separate RStudio sesson.
+
+```{r}
+api <- plumber::plumb("myrestapi.R")
+api$run(host = "127.0.0.1", port = 8000)
+```
+
+
+
+
+
+
+
